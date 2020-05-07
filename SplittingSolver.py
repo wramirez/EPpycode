@@ -27,11 +27,14 @@ class SplittingSolver():
         (self.vs_, self.vs) = self.ode_solver.solution_fields()
         self.VS = self.vs.function_space()
 
+
         # Create PDE solver and extract solution fields
         self.pde_solver = self._create_pde_solver()
         (self.v_, self.v) = self.pde_solver.solution_fields()
 
-
+        V = self.v.function_space()
+        self.merger = FunctionAssigner(self.VS.sub(0),V)
+        
 	def _create_ode_solver(self):
 		"""
 		creates cell solver
@@ -66,17 +69,40 @@ class SplittingSolver():
 		"""
 
 
-	def step(self):
+	def step(self,interval):
 		"""
 		very important: manages the
 		steps of the OP method.
 		"""
+		#parameter theta
+		theta = self.parameters["theta"]
+
+		#time domain
+		(t0,t1) = interval
+		dt = (t1-t0)
+		t = t0+theta*dt 
+
+		# solve step 1 of the splitting method
+		self.ode_solver.step((t0,t))
+		# solve step 2 of the splitiing method
+		self.pde_solver.step((t0,t1))
+		# update variables
+		self.vs_.assing(self.vs)
+		# set the voltage part of vs to the actual voltage given 
+		# by the solution of the pde
+		self.merge(self.vs_) 
+
+		# solve last step (step 3) 
+		self.ode_solver.step((t,t1))
+
 	def merge(self,solution):
 		"""
 		merge solution from ode solver
 		and pde solver
 		
 		"""
+		self.merger.assing(solution.sub(0),self.v)
+
 	def default_parameters():
 
 	def solution_fields():
