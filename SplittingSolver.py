@@ -38,11 +38,28 @@ class SplittingSolver():
 		"""
 		stimulus = self._model.stimulus
 
+		cell_model = self._model.cell_model
+
+		# Extract ode solver parameters
+        params = self.parameters["ODESolver"]
+
+        solver = ODESolver(self._domain, self._time, cell_model,
+                                       I_s=stimulus,
+                                       params=params)
+
+        return solver
+
 
 	def _create_pde_solver(self):
 		"""
 		creates diffusion solver (I guess?)
 		"""
+
+		Mi = self._model.conductivity
+		solver = PDESolver(self._domain,self._time,Mi,v_=self.vs[0])
+
+		return solver
+
 	def solve(self):
 		"""
 		solves the problem
