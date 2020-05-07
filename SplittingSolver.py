@@ -29,7 +29,7 @@ class SplittingSolver():
 
         # Create PDE solver and extract solution fields
         self.pde_solver = self._create_pde_solver()
-        (self.v_, self.vur) = self.pde_solver.solution_fields()
+        (self.v_, self.v) = self.pde_solver.solution_fields()
 
 
 	def _create_ode_solver(self):
@@ -64,6 +64,8 @@ class SplittingSolver():
 		"""
 		solves the problem
 		"""
+
+
 	def step(self):
 		"""
 		very important: manages the
@@ -76,3 +78,8 @@ class SplittingSolver():
 		
 		"""
 	def default_parameters():
+
+	def solution_fields():
+
+		return self.vs_, self.vs, self.v
+
