@@ -4,6 +4,7 @@ base class for operator splitting solver
 of the EP problems
 
 """
+from dolfin import *
 
 class SplittingSolver():
 	def __init__ (self,model,params=None):
