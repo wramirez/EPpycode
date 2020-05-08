@@ -34,7 +34,28 @@ class PDEsolver():
 	def step(self,interval):
 		"""
 		solution at one step
-		
+
 		"""
+		(t0,t1) = interval
+		dt = (t1-t0)
+		Mi = self._Mi 
+
+		# set time
+		t = t0 + theta*(t1-t0)
+		self._time.assing(t)
+
+		#variational formulation
+		u = TrialFunction(self.V)
+		w = TestFunction(self.V)
+		v_mid = theta*v + (1.0-theta)*self.v_
+		G = ((v-self.v_)/Constant(dt))*w*dx() \
+			+ inner(Mi*nabla_grad(v_mid),nabla_grad(w))*dx()
+
+		a,L = system(G)
+		pde = LinearVariationalProblem(a,L,self.v)
+
+		solver = LinearVariationalSolver(pde)
+		solver.solve()
+		
 	def default_parameters():
 	def solve():
