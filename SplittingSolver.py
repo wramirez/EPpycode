@@ -17,23 +17,22 @@ class SplittingSolver():
 		self._domain = model.domain
 		self._time = model.time #Do not know how this works
 
-		if params = None
+		if params == None:
 			self._parameters = self.default_parameters() 
-		else
+		else:
 			self._parameters = params
 
 		# Create ODE solver and extract solution fields
-        self.ode_solver = self._create_ode_solver()
-        (self.vs_, self.vs) = self.ode_solver.solution_fields()
-        self.VS = self.vs.function_space()
+		self.ode_solver = self._create_ode_solver()
+		(self.vs_, self.vs) = self.ode_solver.solution_fields()
+		self.VS = self.vs.function_space()
 
+		# Create PDE solver and extract solution fields
+		self.pde_solver = self._create_pde_solver()
+		(self.v_, self.v) = self.pde_solver.solution_fields()
 
-        # Create PDE solver and extract solution fields
-        self.pde_solver = self._create_pde_solver()
-        (self.v_, self.v) = self.pde_solver.solution_fields()
-
-        V = self.v.function_space()
-        self.merger = FunctionAssigner(self.VS.sub(0),V)
+		V = self.v.function_space()
+		self.merger = FunctionAssigner(self.VS.sub(0),V)
         
 	def _create_ode_solver(self):
 		"""
@@ -44,13 +43,13 @@ class SplittingSolver():
 		cell_model = self._model.cell_model
 
 		# Extract ode solver parameters
-        params = self.parameters["ODESolver"]
+		params = self.parameters["ODESolver"]
 
-        solver = ODESolver(self._domain, self._time, cell_model,
-                                       I_s=stimulus,
-                                       params=params)
+		solver = ODESolver(self._domain, self._time, cell_model,
+		                               I_s=stimulus,
+		                               params=params)
 
-        return solver
+		return solver
 
 
 	def _create_pde_solver(self):
@@ -63,11 +62,22 @@ class SplittingSolver():
 
 		return solver
 
-	def solve(self):
+	def solve(self,interval,dt):
 		"""
 		solves the problem
 		"""
 
+		# implement time stepper
+		# return an iterable	
+		time_stepper = TimeStepper(interval,dt)
+		
+
+		for t0, t1 in time_stepper:
+			self.setp((t0,t1))
+			yield (t0,t1), self.solution_fields()
+
+			# update previous solution
+			self.vs_.assing(self.vs)
 
 	def step(self,interval):
 		"""
@@ -104,6 +114,13 @@ class SplittingSolver():
 		self.merger.assing(solution.sub(0),self.v)
 
 	def default_parameters():
+
+		self.params = Parameters("SplittingSolver")
+		params.add("theta",0.5)
+		ode_solver_parameters = self.ode_solver.default_parameters()
+		pde_solver_parameters = self.pde_solver.default_parameters()
+		params.add(ode_solver_parameters)
+		params.add(pde_solver_parameters)
 
 	def solution_fields():
 
