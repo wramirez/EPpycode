@@ -14,7 +14,7 @@ class PDEsolver():
 		self._Mi = Mi 
 		self._time = time 
 
-		if params != None
+		if params != None:
 			self.params = params 
 		else:
 			self.params = self.default_parameters
@@ -27,7 +27,7 @@ class PDEsolver():
 
 		if v_ != None:
 			self.v_ = Function(self.V,name='v_')
-		else
+		else:
 			self.v_ = v_
 		self.v = Function(V,name="v")
 
@@ -56,6 +56,11 @@ class PDEsolver():
 
 		solver = LinearVariationalSolver(pde)
 		solver.solve()
-		
+
+	def solution_fields():
+
+		return self.v_,self.v 
 	def default_parameters():
+		pass
 	def solve():
+		pass
