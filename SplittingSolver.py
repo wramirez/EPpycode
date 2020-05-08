@@ -123,6 +123,8 @@ class SplittingSolver():
 		params.add(ode_solver_parameters)
 		params.add(pde_solver_parameters)
 
+		return params
+
 	def solution_fields():
 
 		return self.vs_, self.vs, self.v
