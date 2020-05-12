@@ -75,7 +75,7 @@ class ODESolver():
 		I_theta = - self._Iion(v_mid,s_mid,time=self._time)
 
 
-		(dz,rhs) = self._Is.rhs(self._Is,self._domain,w)
+		(dz,rhs) = self._Is.rhs(self._domain,w)
 
 		lhs = ((v-v_)/dt-Itheta)*w*dz + inner((s-s_)/dt-F_theta,r)*dz
 
