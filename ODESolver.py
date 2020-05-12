@@ -85,8 +85,8 @@ class ODESolver():
 
 		# solve the system
 		pde = NonlinearVariationalProblem(G, self.vs, J=derivative(G, self.vs))
-        solver = NonlinearVariationalSolver(pde)
-        solver.solve()
+		solver = NonlinearVariationalSolver(pde)
+		solver.solve()
 
 	def solution_fields(self):
 		

@@ -6,7 +6,7 @@ equation
 
 from dolfin import *
 
-class PDEsolver():
+class PDESolver():
 
 	def __init__(self,domain, time, Mi, v_=None,params=None):
 		# inptu store
