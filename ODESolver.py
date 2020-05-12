@@ -75,7 +75,7 @@ class ODESolver():
 		I_theta = - self._Iion(v_mid,s_mid,time=self._time)
 
 
-		(dz,rhs) = rhs_with_stimulus(self._Is,self._domain,w)
+		(dz,rhs) = self._Is.rhs(self._Is,self._domain,w)
 
 		lhs = ((v-v_)/dt-Itheta)*w*dz + inner((s-s_)/dt-F_theta,r)*dz
 
@@ -91,8 +91,13 @@ class ODESolver():
 	def solution_fields(self):
 		
 		return self.vs_,self.vs 
-		
+
 	def default_parameters(self):
-		pass
+		
+		params = Parameters("ODESolver")
+		params.add("theta",0.5)
+
+		return params
+
 	def solve():
 		pass
