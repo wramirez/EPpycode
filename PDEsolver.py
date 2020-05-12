@@ -61,6 +61,14 @@ class PDEsolver():
 
 		return self.v_,self.v 
 	def default_parameters():
-		pass
+		params = Parameters("MonodomainSolver")
+		params.add("theta",0.5)
+
+		return params
+
 	def solve():
+		"""
+		I don't if this is needed at this 
+		moment
+		"""
 		pass
