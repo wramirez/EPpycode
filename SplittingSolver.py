@@ -55,7 +55,7 @@ class SplittingSolver():
 
 	def _create_pde_solver(self):
 		"""
-		creates diffusion solver (I guess?)
+		creates diffusion solver
 		"""
 
 		Mi = self._model.conductivity
