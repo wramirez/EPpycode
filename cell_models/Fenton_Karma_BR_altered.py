@@ -7,8 +7,8 @@ from __future__ import division
 from collections import OrderedDict
 import ufl
 
-from dolfin import *
-from HEART_EP.cell_models import CellModel
+import dolfin
+from CellModel import *
 
 class Fenton_karma_1998_BR_altered(CellModel):
     def __init__(self, params=None, init_conditions=None):
