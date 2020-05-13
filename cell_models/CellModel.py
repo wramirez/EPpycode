@@ -48,3 +48,6 @@ class CellModel():
 		return number of state variables
 		"""
 		error("Must overload num_states")
+	def __str__(self):
+		
+		return "Some cardiac cell model"
