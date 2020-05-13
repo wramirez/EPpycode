@@ -2,7 +2,7 @@
 Class to handle stimulus
 
 """
-from dolfin import *
+from dolfin import Measure
 
 class Stimulus():
 	def __init__(self,objects,keys,markers):

@@ -35,7 +35,7 @@ class CellModel():
 			Return right hand side for state
 			variable evolution
 		"""
-		error("Mus define F=F(v,s)")
+		error("Must define F=F(v,s)")
 
 	def I(self,v,s,time=None):
 		"""
