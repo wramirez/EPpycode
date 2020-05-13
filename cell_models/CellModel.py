@@ -4,6 +4,7 @@ Base class for cell models
 """
 
 from collections import OrderedDict
+from dolfin import Expression
 
 class CellModel():
 	def __init__(self):
@@ -12,20 +13,38 @@ class CellModel():
 
 
 	def default_parameters():
-		return 
+		return OrderedDict()
 	def defaul_initial_conditions():
-		pass 
-	def set_parameters(self):
-		pass 
-	def set_initial_conditions(self):
-		pass 
+		return OrderedDict()
+	def set_parameters(self,**params):
+		for param_name,param_value in params.items():
+			self._params[param_name] = param_value
+
+	def set_initial_conditions(self,**init):
+		for init_name,init_value in init.items():
+			self._initial_conditions[init_name] = init_value
+
 	def initial_conditions(self):
-		pass 
-	def paramters(self):
-		pass 
+		return Expression(list(self._initial_conditions.keys())
+					,degree=1,**self._initial_conditions)
+	def parameters(self):
+		return self._params
+
 	def F(self,v,s,time=None):
-		pass
+		"""
+			Return right hand side for state
+			variable evolution
+		"""
+		error("Mus define F=F(v,s)")
+
 	def I(self,v,s,time=None):
-		pass
+		"""
+			Return the ionic current
+		"""
+		error("Must define I = I(v,s)")
+
 	def num_states(self):
-		pass
+		"""
+		return number of state variables
+		"""
+		error("Must overload num_states")
