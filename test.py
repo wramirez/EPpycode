@@ -52,11 +52,26 @@ def conductivity(fiber,s_t=None,s_l=None):
 
 	return M
 
-def setup_cardiac_model(cell_model,mesh)
+def setup_cardiac_model():
 	time = Constant(0.0)
-	
+	mesh,fibers,stimcells = create_mesh(0.2,0.2,20.0,20.0,0.6,wstim=1.0)
 	M = conductivity(fiber)
 
+	duration = 2. # ms
+	A = 50000. # mu A/cm^3
+	cm2mm = 10.
+	factor = 1.0/(chi*C_m) # NB: cbcbeat convention
+	amplitude = factor*A*(1./cm2mm)**3 # mV/ms
+
+	I_s = Expression("time >= start ? (time <= (duration + start) ? amplitude : 0.0) : 0.0",
+		time=time,
+		start=0.0,
+		duration=duration,
+		amplitude=amplitude,
+		degree=0)
+	cell_model = Fenton_karma_1998_BR_altered()
+	stim = Stimulus((I_s,),(1,),stimcells)
+	heart = CardiacModel(mesh,time,M,cell_model,stim)
 
 
 
