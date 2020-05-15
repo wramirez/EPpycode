@@ -12,7 +12,7 @@ class Stimulus():
 	def keys(self):
 		return self._objects.keys()
 
-	def values():
+	def values(self):
 		return self._objects.values()
 
 	def rhs(self,mesh,v):
