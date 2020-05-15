@@ -12,10 +12,14 @@ class CellModel():
 		self._initial_conditions = self.defaul_initial_conditions()
 
 
-	def default_parameters():
+	@staticmethod
+	def default_parameters(self):
 		return OrderedDict()
+	
+	@staticmethod
 	def defaul_initial_conditions():
 		return OrderedDict()
+		
 	def set_parameters(self,**params):
 		for param_name,param_value in params.items():
 			self._params[param_name] = param_value

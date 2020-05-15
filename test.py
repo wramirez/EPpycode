@@ -4,9 +4,9 @@ Test for Splitting solver
 """
 
 from dolfin import *
-import SplittingSolver
-import Stimulus
-import CardiacModel
+from SplittingSolver import SplittingSolver
+from Stimulus import Stimulus
+from CardiacModel import CardiacModel
 import numpy as np
 from cell_models.Fenton_Karma_BR_altered import *
 
@@ -56,7 +56,7 @@ def conductivity(fiber,s_t=None,s_l=None):
 
 def setup_cardiac_model():
 	time = Constant(0.0)
-	mesh,fibers,stimcells = create_mesh(0.2,20.0,20.0,0.6,wstim=1.0)
+	mesh,fibers,stimcells = create_mesh(0.2,5.0,5.0,0.6,wstim=1.0)
 	M = conductivity(fibers)
 
 	# Surface to volume ratio
