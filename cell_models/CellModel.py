@@ -7,7 +7,7 @@ from collections import OrderedDict
 from dolfin import Expression
 
 class CellModel():
-	def __init__(self):
+	def __init__(self,params=None,initial_conditions=None):
 		self._params = self.default_parameters()
 		self._initial_conditions = self.defaul_initial_conditions()
 

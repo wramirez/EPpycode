@@ -7,11 +7,13 @@ from dolfin import *
 import SplittingSolver
 import Stimulus
 import CardiacModel
+import numpy as np
+from cell_models.Fenton_Karma_BR_altered import *
 
-
-def create_mesh(dx,lx,ly,lz,wstim):
+def create_mesh(dx,Lx,Ly,Lz,wstim):
 	N = lambda v:int(np.int(v))
-	mesh = BoxMesh(mpi_comm_world(),
+	mesh = Mesh()
+	mesh = BoxMesh(mesh.mpi_comm(),
 		Point(0.0, 0.0, 0.0),
 		Point(Lx, Ly, Lz),
 		N(Lx/dx), N(Ly/dx), N(Lz/dx))
@@ -54,9 +56,13 @@ def conductivity(fiber,s_t=None,s_l=None):
 
 def setup_cardiac_model():
 	time = Constant(0.0)
-	mesh,fibers,stimcells = create_mesh(0.2,0.2,20.0,20.0,0.6,wstim=1.0)
-	M = conductivity(fiber)
+	mesh,fibers,stimcells = create_mesh(0.2,20.0,20.0,0.6,wstim=1.0)
+	M = conductivity(fibers)
 
+	# Surface to volume ratio
+	chi = 140.0     # mm^{-1}
+	# Membrane capacitance
+	C_m = 0.01 # mu F / mm^2
 	duration = 2. # ms
 	A = 50000. # mu A/cm^3
 	cm2mm = 10.
@@ -69,9 +75,11 @@ def setup_cardiac_model():
 		duration=duration,
 		amplitude=amplitude,
 		degree=0)
-	cell_model = Fenton_karma_1998_BR_altered()
+	cell_model = Fenton_Karma_1998_BR_altered()
 	stim = Stimulus((I_s,),(1,),stimcells)
 	heart = CardiacModel(mesh,time,M,cell_model,stim)
+
+setup_cardiac_model()
 
 
 

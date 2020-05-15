@@ -8,9 +8,9 @@ from collections import OrderedDict
 import ufl
 
 import dolfin
-from CellModel import *
+from cell_models.CellModel import *
 
-class Fenton_karma_1998_BR_altered(CellModel):
+class Fenton_Karma_1998_BR_altered(CellModel):
     def __init__(self, params=None, init_conditions=None):
         """
         Create cardiac cell model
@@ -21,7 +21,7 @@ class Fenton_karma_1998_BR_altered(CellModel):
          init_conditions (dict, :py:class:`dolfin.Mesh`, optional)
            optional initial conditions
         """
-        CardiacCellModel.__init__(self, params, init_conditions)
+        CellModel.__init__(self, params, init_conditions)
 
     @staticmethod
     def default_parameters():
