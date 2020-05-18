@@ -24,3 +24,5 @@ class CardiacModel():
 		return self._domain
 	def cell_model(self):
 		return self._cell_model
+	def stimulus(self):
+		return self._stimulus

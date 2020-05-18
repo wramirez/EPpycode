@@ -60,6 +60,8 @@ class PDESolver():
 	def solution_fields():
 
 		return self.v_,self.v 
+
+	@staticmethod
 	def default_parameters():
 		params = Parameters("MonodomainSolver")
 		params.add("theta",0.5)

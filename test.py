@@ -91,7 +91,14 @@ def setup_cardiac_model():
 	stim = Stimulus((I_s,),(1,),stimcells)
 	heart = CardiacModel(mesh,time,M,cell_model,stim)
 
-setup_cardiac_model()
+	return heart
+
+def solve_cardiac_model():
+	cardiac_model = setup_cardiac_model()
+	splitting_solver = SplittingSolver(cardiac_model)
+	splitting_solver.solve((0.0,100.0),0.1) 
+
+solve_cardiac_model()
 
 
 

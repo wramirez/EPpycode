@@ -92,7 +92,8 @@ class ODESolver():
 		
 		return self.vs_,self.vs 
 
-	def default_parameters(self):
+	@staticmethod
+	def default_parameters():
 		
 		params = Parameters("ODESolver")
 		params.add("theta",0.5)

@@ -5,6 +5,8 @@ of the EP problems
 
 """
 from dolfin import *
+from ODESolver import ODESolver
+from PDESolver import PDESolver
 
 class SplittingSolver():
 	def __init__ (self,model,params=None):
@@ -16,12 +18,13 @@ class SplittingSolver():
 		#initialize by taking the model (heart) info
 		self._model = model
 		self._domain = model.domain
-		self._time = model.time #Do not know how this works
+		self._time = model.time 
 
 		if params == None:
 			self._parameters = self.default_parameters() 
 		else:
 			self._parameters = params
+		
 
 		# Create ODE solver and extract solution fields
 		self.ode_solver = self._create_ode_solver()
@@ -34,6 +37,8 @@ class SplittingSolver():
 
 		V = self.v.function_space()
 		self.merger = FunctionAssigner(self.VS.sub(0),V)
+
+		
         
 	def _create_ode_solver(self):
 		"""
@@ -44,7 +49,7 @@ class SplittingSolver():
 		cell_model = self._model.cell_model
 
 		# Extract ode solver parameters
-		params = self.parameters["ODESolver"]
+		params = self._parameters["ODESolver"]
 
 		solver = ODESolver(self._domain, self._time, cell_model,
 		                               I_s=stimulus,
@@ -70,7 +75,7 @@ class SplittingSolver():
 		while t[ind][1]<=t1:
 			t.append((t[ind][1],t[ind][1]+dt))
 		return t 
-		
+
 	def solve(self,interval,dt):
 		"""
 		solves the problem
@@ -94,7 +99,7 @@ class SplittingSolver():
 		steps of the OP method.
 		"""
 		#parameter theta
-		theta = self.parameters["theta"]
+		theta = self._parameters["theta"]
 
 		#time domain
 		(t0,t1) = interval
@@ -122,18 +127,19 @@ class SplittingSolver():
 		"""
 		self.merger.assing(solution.sub(0),self.v)
 
+	@staticmethod
 	def default_parameters():
 
-		self.params = Parameters("SplittingSolver")
+		params = Parameters("SplittingSolver")
 		params.add("theta",0.5)
-		ode_solver_parameters = self.ode_solver.default_parameters()
-		pde_solver_parameters = self.pde_solver.default_parameters()
+		ode_solver_parameters = ODESolver.default_parameters()
+		pde_solver_parameters = PDESolver.default_parameters()
 		params.add(ode_solver_parameters)
 		params.add(pde_solver_parameters)
 
 		return params
 
-	def solution_fields():
+	def solution_fields(self):
 
 		return self.vs_, self.vs, self.v
 
