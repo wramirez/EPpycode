@@ -10,6 +10,19 @@ from CardiacModel import CardiacModel
 import numpy as np
 from cell_models.Fenton_Karma_BR_altered import *
 
+class MyExpression():
+	def __init__(self,period,duration,start,Iamp,t):
+		self.period = period
+		self.duration = duration
+		self.start = start
+		self.Iamp = Iamp
+		self.t = t
+
+	def eval(self,value,x):
+		t = self.t
+		I =(self.Iamp if t-int(t/self.period)*self.period  <= self.duration+self.start else 0.0) \
+			if (t-int(t/self.period)*self.period >= self.start) else 0.0*self.Iamp
+
 def create_mesh(dx,Lx,Ly,Lz,wstim):
 	N = lambda v:int(np.int(v))
 	mesh = Mesh()
@@ -68,13 +81,12 @@ def setup_cardiac_model():
 	cm2mm = 10.
 	factor = 1.0/(chi*C_m) # NB: cbcbeat convention
 	amplitude = factor*A*(1./cm2mm)**3 # mV/ms
+	start = 2.0
+	period = 300.0
 
-	I_s = Expression("time >= start ? (time <= (duration + start) ? amplitude : 0.0) : 0.0",
-		time=time,
-		start=0.0,
-		duration=duration,
-		amplitude=amplitude,
-		degree=0)
+	I_s = MyExpression(period,duration,start,amplitude,time)
+
+	
 	cell_model = Fenton_Karma_1998_BR_altered()
 	stim = Stimulus((I_s,),(1,),stimcells)
 	heart = CardiacModel(mesh,time,M,cell_model,stim)
