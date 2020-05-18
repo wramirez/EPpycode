@@ -62,7 +62,15 @@ class SplittingSolver():
 		solver = PDESolver(self._domain,self._time,Mi,v_=self.vs[0])
 
 		return solver
-
+	@staticmethod
+	def time_stepper(interval,dt):
+		(t0,t1) = interval
+		t =[(t0,t0+dt)]
+		ind = 0
+		while t[ind][1]<=t1:
+			t.append((t[ind][1],t[ind][1]+dt))
+		return t 
+		
 	def solve(self,interval,dt):
 		"""
 		solves the problem
@@ -70,11 +78,11 @@ class SplittingSolver():
 
 		# implement time stepper
 		# return an iterable	
-		time_stepper = TimeStepper(interval,dt)
+		time_stepper = self.time_stepper(interval,dt)
 		
 
 		for t0, t1 in time_stepper:
-			self.setp((t0,t1))
+			self.step((t0,t1))
 			yield (t0,t1), self.solution_fields()
 
 			# update previous solution
