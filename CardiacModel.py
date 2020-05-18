@@ -5,7 +5,7 @@ to handle heart EP inputs
 """
 
 
-class CardiacModel():
+class CardiacModel:
 
 	def  __init__(self,domain,time,Mi,
 					cell_model,stimulus):

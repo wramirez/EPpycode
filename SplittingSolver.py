@@ -8,7 +8,7 @@ from dolfin import *
 from ODESolver import ODESolver
 from PDESolver import PDESolver
 
-class SplittingSolver():
+class SplittingSolver:
 	def __init__ (self,model,params=None):
 		"""
 		model = class of the heart
@@ -17,8 +17,8 @@ class SplittingSolver():
 		"""
 		#initialize by taking the model (heart) info
 		self._model = model
-		self._domain = model.domain
-		self._time = model.time 
+		self._domain = model.domain()
+		self._time = model.time() 
 
 		if params == None:
 			self._parameters = self.default_parameters() 
@@ -44,9 +44,9 @@ class SplittingSolver():
 		"""
 		creates cell solver
 		"""
-		stimulus = self._model.stimulus
+		stimulus = self._model.stimulus()
 
-		cell_model = self._model.cell_model
+		cell_model = self._model.cell_model()
 
 		# Extract ode solver parameters
 		params = self._parameters["ODESolver"]

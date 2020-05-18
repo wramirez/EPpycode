@@ -8,7 +8,7 @@ from SplittingSolver import SplittingSolver
 from Stimulus import Stimulus
 from CardiacModel import CardiacModel
 import numpy as np
-from cell_models.Fenton_Karma_BR_altered import *
+from cell_models.Fenton_Karma_BR_altered import Fenton_Karma_1998_BR_altered
 
 class MyExpression():
 	def __init__(self,period,duration,start,Iamp,t):

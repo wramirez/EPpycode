@@ -6,7 +6,7 @@ Base class for cell models
 from collections import OrderedDict
 from dolfin import Expression
 
-class CellModel():
+class CellModel(object):
 	def __init__(self,params=None,initial_conditions=None):
 		self._params = self.default_parameters()
 		self._initial_conditions = self.defaul_initial_conditions()
@@ -55,3 +55,8 @@ class CellModel():
 	def __str__(self):
 		
 		return "Some cardiac cell model"
+
+	def __dir__(self):
+		return ['default_parameters','defaul_initial_conditions',
+			'F','I','num_states','set_parameters','set_initial_conditions',
+			'parameters','initial_conditions']
