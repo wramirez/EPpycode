@@ -85,6 +85,8 @@ class ODESolver(object):
 		# solve the system
 		pde = NonlinearVariationalProblem(G, self.vs, J=derivative(G, self.vs))
 		solver = NonlinearVariationalSolver(pde)
+		solver_params = self.params["nonlinear_variational_solver"]
+		solver.parameters.update(solver_params)
 		solver.solve()
 
 	def solution_fields(self):
@@ -96,6 +98,11 @@ class ODESolver(object):
 		
 		params = Parameters("ODESolver")
 		params.add("theta",0.5)
+
+		# Use iterative solver as default.
+		params.add(NonlinearVariationalSolver.default_parameters())
+		params["nonlinear_variational_solver"]["newton_solver"]["linear_solver"] = "gmres"
+
 
 		return params
 

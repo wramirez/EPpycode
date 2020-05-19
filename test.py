@@ -69,7 +69,7 @@ def conductivity(fiber,s_t=None,s_l=None):
 
 def setup_cardiac_model():
 	time = Constant(0.0)
-	mesh,fibers,stimcells = create_mesh(1.0,5.0,5.0,1.0,wstim=1.0)
+	mesh,fibers,stimcells = create_mesh(0.2,5.0,5.0,0.2,wstim=1.0)
 	M = conductivity(fibers)
 
 	# Surface to volume ratio
@@ -91,17 +91,31 @@ def setup_cardiac_model():
 	stim = Stimulus((I_s,),(1,),stimcells)
 	heart = CardiacModel(mesh,time,M,cell_model,stim)
 
-	return heart
+	return heart,cell_model
 
 def solve_cardiac_model():
-	cardiac_model = setup_cardiac_model()
+	cardiac_model,cell_model = setup_cardiac_model()
 	solver = SplittingSolver(cardiac_model)
-	dt = 0.01
-	interval = (0.0,10.0)
+	(vs_,vs,v) = solver.solution_fields()
+	vs_.assign(cell_model.initial_conditions())
+	
+	dt = 0.1
+	interval = (0.0,100.0)
+
+	pvdfile = File("outputs/voltage.pvd")
+	printstep = 10.0
+	count = 0
+
+
 
 	for (timestep,fields) in solver.solve(interval,dt):
-		
-		print("(t_0, t_1) = (%g, %g)", timestep)
+
+		(vs_,vs,v) =fields
+		(t0,t) = timestep
+		if float(count)%printstep == 0:
+			pvdfile << (v,t0)
+		count += 1
+		print("(t_0, t_1) = (%g, %g)"%timestep)
 
 solve_cardiac_model()
 
