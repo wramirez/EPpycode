@@ -7,6 +7,7 @@ of the EP problems
 from dolfin import *
 from ODESolver import ODESolver
 from PDESolver import PDESolver
+import numpy as np
 
 class SplittingSolver:
 	def __init__ (self,model,params=None):
@@ -72,6 +73,7 @@ class SplittingSolver:
 		(t0,t1) = interval
 		t =[(t0,t0+dt)]
 		ind = 0
+		
 		while t[ind][1]<=t1:
 			t.append((t[ind][1],t[ind][1]+dt))
 		return t 
@@ -83,13 +85,16 @@ class SplittingSolver:
 
 		# implement time stepper
 		# return an iterable	
-		time_stepper = self.time_stepper(interval,dt)
+		# time_stepper = self.time_stepper(interval,dt)
 		
+		t = np.arange(interval[0],interval[1],dt)
 
-		for t0, t1 in time_stepper:
+		for ti in t:
+			t0 = ti 
+			t1 = ti + dt
 			self.step((t0,t1))
-			yield (t0,t1), self.solution_fields()
-
+			# yield (t0,t1), self.solution_fields()
+			print (t0,t1)
 			# update previous solution
 			self.vs_.assing(self.vs)
 

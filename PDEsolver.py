@@ -57,7 +57,7 @@ class PDESolver():
 		solver = LinearVariationalSolver(pde)
 		solver.solve()
 
-	def solution_fields():
+	def solution_fields(self):
 
 		return self.v_,self.v 
 

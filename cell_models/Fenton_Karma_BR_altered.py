@@ -69,16 +69,16 @@ class Fenton_Karma_1998_BR_altered(CellModel):
         v, w = s
 
         # Assign parameters
-        u_c = self._parameters["u_c"]
-        g_fi_max = self._parameters["g_fi_max"]
-        tau_0 = self._parameters["tau_0"]
-        tau_r = self._parameters["tau_r"]
-        k = self._parameters["k"]
-        tau_si = self._parameters["tau_si"]
-        u_csi = self._parameters["u_csi"]
-        Cm = self._parameters["Cm"]
-        V_0 = self._parameters["V_0"]
-        V_fi = self._parameters["V_fi"]
+        u_c = self._params["u_c"]
+        g_fi_max = self._params["g_fi_max"]
+        tau_0 = self._params["tau_0"]
+        tau_r = self._params["tau_r"]
+        k = self._params["k"]
+        tau_si = self._params["tau_si"]
+        u_csi = self._params["u_csi"]
+        Cm = self._params["Cm"]
+        V_0 = self._params["V_0"]
+        V_fi = self._params["V_fi"]
 
         # Init return args
         current = [ufl.zero()]*1
@@ -128,15 +128,15 @@ class Fenton_Karma_1998_BR_altered(CellModel):
         v, w = s
 
         # Assign parameters
-        u_c = self._parameters["u_c"]
-        u_v = self._parameters["u_v"]
-        tau_v1_minus = self._parameters["tau_v1_minus"]
-        tau_v2_minus = self._parameters["tau_v2_minus"]
-        tau_v_plus = self._parameters["tau_v_plus"]
-        tau_w_minus = self._parameters["tau_w_minus"]
-        tau_w_plus = self._parameters["tau_w_plus"]
-        V_0 = self._parameters["V_0"]
-        V_fi = self._parameters["V_fi"]
+        u_c = self._params["u_c"]
+        u_v = self._params["u_v"]
+        tau_v1_minus = self._params["tau_v1_minus"]
+        tau_v2_minus = self._params["tau_v2_minus"]
+        tau_v_plus = self._params["tau_v_plus"]
+        tau_w_minus = self._params["tau_w_minus"]
+        tau_w_plus = self._params["tau_w_plus"]
+        V_0 = self._params["V_0"]
+        V_fi = self._params["V_fi"]
 
         # Init return args
         F_expressions = [ufl.zero()]*2

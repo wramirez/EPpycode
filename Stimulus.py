@@ -16,7 +16,7 @@ class Stimulus():
 		return self._objects.values()
 
 	def rhs(self,mesh,v):
-		markers = self._markers()
+		markers = self._markers
 		dz = Measure("dx", domain=mesh, subdomain_data=markers)
 		rhs = sum([g*v*dz(i) for (i, g) in zip(self.keys(), self.values())])
 				

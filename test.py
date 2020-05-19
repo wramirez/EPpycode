@@ -69,7 +69,7 @@ def conductivity(fiber,s_t=None,s_l=None):
 
 def setup_cardiac_model():
 	time = Constant(0.0)
-	mesh,fibers,stimcells = create_mesh(0.2,5.0,5.0,0.6,wstim=1.0)
+	mesh,fibers,stimcells = create_mesh(1.0,5.0,5.0,1.0,wstim=1.0)
 	M = conductivity(fibers)
 
 	# Surface to volume ratio
@@ -95,8 +95,16 @@ def setup_cardiac_model():
 
 def solve_cardiac_model():
 	cardiac_model = setup_cardiac_model()
-	splitting_solver = SplittingSolver(cardiac_model)
-	splitting_solver.solve((0.0,100.0),0.1) 
+	solver = SplittingSolver(cardiac_model)
+	dt = 0.1
+	interval = (0.0,10.0)
+
+	solver.solve(interval,dt)
+	# ts = solver.time_stepper(interval,dt)
+	# print(ts)
+	# for (timestep,fields) in solver.solve(interval,dt):
+		# print("!hola!!")
+		# print("(t_0, t_1) = (%g, %g)", timestep)
 
 solve_cardiac_model()
 

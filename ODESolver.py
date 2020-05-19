@@ -52,8 +52,8 @@ class ODESolver(object):
 
 		# current variables
 		self.vs.assign(self.vs_)
-		v_ = self.vs[0]
-		s_ = as_vector([self.vs[i] for i in range(1,dim)])
+		v = self.vs[0]
+		s = as_vector([self.vs[i] for i in range(1,dim)])
 
 		# test functions for voltage and internal variables
 		w = wtest[0]
