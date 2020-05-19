@@ -22,7 +22,7 @@ class MyExpression(UserExpression):
 		t = float(self.t)
 		I =(self.Iamp if t-int(t/self.period)*self.period  <= self.duration+self.start else 0.0) \
 			if (t-int(t/self.period)*self.period >= self.start) else 0.0*self.Iamp
-
+		value[0] = I
 def create_mesh(dx,Lx,Ly,Lz,wstim):
 	N = lambda v:int(np.int(v))
 	mesh = Mesh()
@@ -96,15 +96,12 @@ def setup_cardiac_model():
 def solve_cardiac_model():
 	cardiac_model = setup_cardiac_model()
 	solver = SplittingSolver(cardiac_model)
-	dt = 0.1
+	dt = 0.01
 	interval = (0.0,10.0)
 
-	solver.solve(interval,dt)
-	# ts = solver.time_stepper(interval,dt)
-	# print(ts)
-	# for (timestep,fields) in solver.solve(interval,dt):
-		# print("!hola!!")
-		# print("(t_0, t_1) = (%g, %g)", timestep)
+	for (timestep,fields) in solver.solve(interval,dt):
+		
+		print("(t_0, t_1) = (%g, %g)", timestep)
 
 solve_cardiac_model()
 

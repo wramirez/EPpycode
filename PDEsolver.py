@@ -25,7 +25,7 @@ class PDESolver():
 		V = FunctionSpace(self._domain,"CG",k) 
 		self.V = V
 
-		if v_ != None:
+		if v_ == None:
 			self.v_ = Function(self.V,name='v_')
 		else:
 			self.v_ = v_
