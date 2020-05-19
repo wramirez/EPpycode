@@ -12,7 +12,7 @@ class CardiacModel:
 
 		self._domain = domain 
 		self._time = time 
-		self.intracellular_conductivity = Mi
+		self._intracellular_conductivity = Mi
 		self._cell_model = cell_model
 		self._stimulus = stimulus
 

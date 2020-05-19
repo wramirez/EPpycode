@@ -39,13 +39,14 @@ class PDESolver():
 		(t0,t1) = interval
 		dt = (t1-t0)
 		Mi = self._Mi 
+		theta = self.params["theta"]
 
 		# set time
 		t = t0 + theta*(t1-t0)
-		self._time.assing(t)
+		self._time.assign(t)
 
 		#variational formulation
-		u = TrialFunction(self.V)
+		v = TrialFunction(self.V)
 		w = TestFunction(self.V)
 		v_mid = theta*v + (1.0-theta)*self.v_
 		G = ((v-self.v_)/Constant(dt))*w*dx() \
@@ -63,14 +64,14 @@ class PDESolver():
 
 	@staticmethod
 	def default_parameters():
-		params = Parameters("MonodomainSolver")
+		params = Parameters("PDESolver")
 		params.add("theta",0.5)
 
 		return params
 
 	def solve():
 		"""
-		I don't if this is needed at this 
+		I don't know if this is needed at this 
 		moment
 		"""
 		pass

@@ -76,10 +76,10 @@ class ODESolver(object):
 
 		(dz,rhs) = self._Is.rhs(self._domain,w)
 
-		lhs = ((v-v_)/dt-Itheta)*w*dz + inner((s-s_)/dt-F_theta,r)*dz
+		lhs = ((v-v_)/dt-I_theta)*w*dz + inner((s-s_)/dt-F_theta,r)*dz
 
 		# set up system of equations
-		G = lhs,rhs
+		G = lhs-rhs
 
 
 		# solve the system

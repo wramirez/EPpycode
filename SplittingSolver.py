@@ -63,9 +63,10 @@ class SplittingSolver:
 		"""
 		creates diffusion solver
 		"""
-
-		Mi = self._model.conductivity
-		solver = PDESolver(self._domain,self._time,Mi,v_=self.vs[0])
+		params = self._parameters["PDESolver"]
+		Mi = self._model.conductivity()
+		solver = PDESolver(self._domain,self._time,Mi,
+				v_=self.vs[0],params=params)
 
 		return solver
 	@staticmethod
@@ -92,11 +93,12 @@ class SplittingSolver:
 		for ti in t:
 			t0 = ti 
 			t1 = ti + dt
+			print("(info)-- time (ms): ",t0)
 			self.step((t0,t1))
 			# yield (t0,t1), self.solution_fields()
 			print (t0,t1)
 			# update previous solution
-			self.vs_.assing(self.vs)
+			self.vs_.assign(self.vs)
 
 	def step(self,interval):
 		"""
@@ -116,7 +118,7 @@ class SplittingSolver:
 		# solve step 2 of the splitiing method
 		self.pde_solver.step((t0,t1))
 		# update variables
-		self.vs_.assing(self.vs)
+		self.vs_.assign(self.vs)
 		# set the voltage part of vs to the actual voltage given 
 		# by the solution of the pde
 		self.merge(self.vs_) 
@@ -130,7 +132,7 @@ class SplittingSolver:
 		and pde solver
 		
 		"""
-		self.merger.assing(solution.sub(0),self.v)
+		self.merger.assign(solution.sub(0),self.v)
 
 	@staticmethod
 	def default_parameters():

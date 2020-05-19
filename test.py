@@ -10,16 +10,16 @@ from CardiacModel import CardiacModel
 import numpy as np
 from cell_models.Fenton_Karma_BR_altered import Fenton_Karma_1998_BR_altered
 
-class MyExpression():
-	def __init__(self,period,duration,start,Iamp,t):
+class MyExpression(UserExpression):
+	def __init__(self,period,duration,start,Iamp,t,**kwargs):
 		self.period = period
 		self.duration = duration
 		self.start = start
 		self.Iamp = Iamp
 		self.t = t
-
+		super().__init__(self,**kwargs)
 	def eval(self,value,x):
-		t = self.t
+		t = float(self.t)
 		I =(self.Iamp if t-int(t/self.period)*self.period  <= self.duration+self.start else 0.0) \
 			if (t-int(t/self.period)*self.period >= self.start) else 0.0*self.Iamp
 
