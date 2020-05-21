@@ -76,7 +76,7 @@ class ODESolver(object):
 
 		(dz,rhs) = self._Is.rhs(self._domain,w)
 
-		lhs = ((v-v_)/dt-I_theta)*w*dz() + inner((s-s_)/dt-F_theta,r)*dz()
+		lhs = ((v-v_)/dt-I_theta)*w*dz + inner((s-s_)/dt-F_theta,r)*dz
 
 		# set up system of equations
 		G = lhs-rhs
@@ -105,5 +105,23 @@ class ODESolver(object):
 
 		return params
 
-	def solve():
-		pass
+	def solve(self,interval,dt):
+		"""
+		solves the problem
+		"""
+			
+		time_stepper = TimeStepper(interval,dt)
+
+		for t0,t1 in time_stepper:
+			self.step((t0,t1))
+			yield (t0,t1), self.solution_fields()
+			# update previous solution
+			self.vs_.assign(self.vs)
+
+
+class SingleCellSolver(ODESolver):
+	def __init__(self,model,time,params=None):
+		self._model=model 
+		mesh = UnitIntervalMesh(1)
+		ODESolver.__init__(self,mesh,time,model,
+				I_s=model.stimulus,params=params):

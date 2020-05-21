@@ -47,7 +47,7 @@ def create_mesh(dx,Lx,Ly,Lz,wstim):
 	W = VectorFunctionSpace(mesh,'DG',0,3)
 	fiber = Function(W)
 	fiber_vals = np.zeros(ncells*3)
-	fiber_vals[::3] = 1.0
+	fiber_vals[:] = 1.0
 	fiber.vector()[:] = fiber_vals
 
 	for cell in cells(mesh):
