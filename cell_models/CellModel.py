@@ -4,20 +4,31 @@ Base class for cell models
 """
 
 from collections import OrderedDict
-from dolfin import Expression
+from dolfin import UserExpression
+
+class initial_conditions_expression(UserExpression):
+	def __init__(self,initial_conditions,num_states,**kwargs):
+		self.initial_conditions = initial_conditions
+		self.num_states = num_states
+		super().__init__(self,**kwargs)
+	def eval(self,value,x):
+		for i,(key,values) in enumerate(self.initial_conditions.items()):
+			value[i] = values
+	def value_shape(self):
+		return (self.num_states+1,)
 
 class CellModel(object):
 	def __init__(self,params=None,initial_conditions=None):
-		self._params = self.default_parameters()
-		self._initial_conditions = self.defaul_initial_conditions()
 
+		self._params = self.default_parameters()
+		self._initial_conditions = self.default_initial_conditions()
 
 	@staticmethod
-	def default_parameters(self):
+	def default_parameters():
 		return OrderedDict()
 	
 	@staticmethod
-	def defaul_initial_conditions():
+	def default_initial_conditions():
 		return OrderedDict()
 		
 	def set_parameters(self,**params):
@@ -29,8 +40,14 @@ class CellModel(object):
 			self._initial_conditions[init_name] = init_value
 
 	def initial_conditions(self):
-		return Expression(list(self._initial_conditions.keys())
-					,degree=1,**self._initial_conditions)
+
+		"""
+		This function returns initial conditions
+		as an UserExpression
+		"""
+		return initial_conditions_expression(self._initial_conditions,
+				self.num_states(),degree=1)
+
 	def parameters(self):
 		return self._params
 

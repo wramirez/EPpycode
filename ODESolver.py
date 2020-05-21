@@ -81,7 +81,6 @@ class ODESolver(object):
 		# set up system of equations
 		G = lhs-rhs
 
-
 		# solve the system
 		pde = NonlinearVariationalProblem(G, self.vs, J=derivative(G, self.vs))
 		solver = NonlinearVariationalSolver(pde)
