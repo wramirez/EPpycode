@@ -21,7 +21,7 @@ class PDESolver():
 
 		# set up function space
 		# need to implement change order (k)
-		k = 1
+		k = self.params["polynomial_degree"]
 		V = FunctionSpace(self._domain,"CG",k) 
 		self.V = V
 
@@ -66,6 +66,7 @@ class PDESolver():
 	def default_parameters():
 		params = Parameters("PDESolver")
 		params.add("theta",0.5)
+		params.add("polynomial_degree",1)
 
 		return params
 

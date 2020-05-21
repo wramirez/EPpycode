@@ -76,8 +76,6 @@ class SplittingSolver:
 		solves the problem
 		"""
 
-		# implement time stepper
-		# return an iterable	
 		time_stepper = TimeStepper(interval,dt)
 
 		for t0,t1 in time_stepper:
@@ -126,6 +124,8 @@ class SplittingSolver:
 		params = Parameters("SplittingSolver")
 		params.add("theta",0.5)
 		ode_solver_parameters = ODESolver.default_parameters()
+		ode_solver_parameters["V_polynomial_degree"] = 1
+		ode_solver_parameters["V_polynomial_family"] = "CG"
 		pde_solver_parameters = PDESolver.default_parameters()
 		params.add(ode_solver_parameters)
 		params.add(pde_solver_parameters)

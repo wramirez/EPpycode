@@ -4,6 +4,8 @@ ODE solver
 
 """
 from dolfin import *
+from Stimulus import Stimulus
+from Utilities import TimeStepper,state_space
 
 class ODESolver(object):
 	def __init__(self,domain,time,model,I_s,params=None):
@@ -24,9 +26,21 @@ class ODESolver(object):
 		else:
 			self.params = self.default_parameters()
 
-		# create function space
-		self.VS = VectorFunctionSpace(domain,"CG",1,
+		# Create (mixed) function space for potential + states
+		v_family = self.params["V_polynomial_family"]
+		v_degree = self.params["V_polynomial_degree"]
+		s_family = self.params["S_polynomial_family"]
+		s_degree = self.params["S_polynomial_degree"]
+
+        #if functions spaces are the same 
+		if (v_family == s_family and s_degree == v_degree):
+			self.VS = VectorFunctionSpace(self._domain,v_family,v_degree,
 								self._num_states+1)
+		else: 
+			V = FunctionSpace(self._domain, v_family, v_degree)
+			S = state_space(self._domain, self._num_states, s_family, s_degree)
+			Mx = MixedElement(V.ufl_element(), S.ufl_element())
+			self.VS = FunctionSpace(self._domain, Mx)
 
 		self.vs_ = Function(self.VS,name="vs_")
 		self.vs = Function(self.VS,name="vs")
@@ -97,6 +111,10 @@ class ODESolver(object):
 		
 		params = Parameters("ODESolver")
 		params.add("theta",0.5)
+		params.add("V_polynomial_degree", 0)
+		params.add("V_polynomial_family", "DG")
+		params.add("S_polynomial_degree", 0)
+		params.add("S_polynomial_family", "DG")
 
 		# Use iterative solver as default.
 		params.add(NonlinearVariationalSolver.default_parameters())
@@ -120,8 +138,11 @@ class ODESolver(object):
 
 
 class SingleCellSolver(ODESolver):
-	def __init__(self,model,time,params=None):
-		self._model=model 
+	def __init__(self,model,time,I_s,params=None):
+		self._model=model
 		mesh = UnitIntervalMesh(1)
+		markers = MeshFunction("size_t",mesh,1)
+		markers.set_all(1)
+		stimulus = Stimulus((I_s,),(1,),markers)
 		ODESolver.__init__(self,mesh,time,model,
-				I_s=model.stimulus,params=params):
+				I_s=stimulus,params=params)
