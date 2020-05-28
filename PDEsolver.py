@@ -5,14 +5,16 @@ equation
 """
 
 from dolfin import *
+from Utilities import TimeStepper
 
 class PDESolver():
 
-	def __init__(self,domain, time, Mi, v_=None,params=None):
+	def __init__(self,domain, time,Mi , Is=None, v_=None,params=None):
 		# inptu store
 		self._domain = domain 
 		self._Mi = Mi 
 		self._time = time 
+		self._Is = Is
 
 		if params != None:
 			self.params = params 
@@ -20,7 +22,6 @@ class PDESolver():
 			self.params = self.default_parameters
 
 		# set up function space
-		# need to implement change order (k)
 		k = self.params["polynomial_degree"]
 		V = FunctionSpace(self._domain,"CG",k) 
 		self.V = V
@@ -49,8 +50,12 @@ class PDESolver():
 		v = TrialFunction(self.V)
 		w = TestFunction(self.V)
 		v_mid = theta*v + (1.0-theta)*self.v_
-		G = ((v-self.v_)/Constant(dt))*w*dx() \
-			+ inner(Mi*nabla_grad(v_mid),nabla_grad(w))*dx()
+
+		(dz,rhs) = (dx,0.0) if self._Is==None \
+		 	else self._Is.rhs(self._domain,w)
+		G = ((v-self.v_)/Constant(dt))*w*dz() \
+			+ inner(Mi*grad(v_mid),grad(w))*dz() \
+			- rhs
 
 		a,L = system(G)
 		pde = LinearVariationalProblem(a,L,self.v)
@@ -70,9 +75,15 @@ class PDESolver():
 
 		return params
 
-	def solve():
+	def solve(self,interval,dt):
 		"""
-		I don't know if this is needed at this 
-		moment
+		solves the problem
 		"""
-		pass
+			
+		time_stepper = TimeStepper(interval,dt)
+
+		for t0,t1 in time_stepper:
+			self.step((t0,t1))
+			yield (t0,t1), self.solution_fields()
+			# update previous solution
+			self.v_.assign(self.v)

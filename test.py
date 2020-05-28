@@ -61,8 +61,8 @@ def create_mesh(dx,Lx,Ly,Lz,wstim):
 
 def conductivity(fiber,s_t=None,s_l=None):
 	if s_t == None and s_l == None:
-		s_t = 1.0
-		s_l = 1.0
+		s_t = 0.1
+		s_l = 0.1
 
 	t11 = (s_t+(s_l-s_t)*fiber[0]*fiber[0])
 	t22 = (s_t+(s_l-s_t)*fiber[1]*fiber[1])
@@ -84,7 +84,7 @@ def setup_cardiac_model():
 	chi = 140.0     # mm^{-1}
 	# Membrane capacitance
 	C_m = 0.01 # mu F / mm^2
-	duration = 5. # ms
+	duration = 2. # ms
 	A = 25000. # mu A/cm^3
 	cm2mm = 10.
 	factor = 1.0/(chi*C_m) # NB: cbcbeat convention
@@ -93,8 +93,7 @@ def setup_cardiac_model():
 	period = 300.0
 
 	I_s = MyExpression(period,duration,start,amplitude,time)
-
-	
+		
 	cell_model = Fenton_Karma_1998_BR_altered()
 	stim = Stimulus((I_s,),(1,),stimcells)
 	heart = CardiacModel(mesh,time,M,cell_model,stim)
@@ -107,11 +106,11 @@ def solve_cardiac_model():
 	(vs_,vs,v) = solver.solution_fields()
 	vs_.assign(interpolate(cell_model.initial_conditions(),vs_.function_space()))
 	
-	dt = 0.01
-	interval = (0.0,100.0)
+	dt = 0.02
+	interval = (0.0,10.0)
 
 	pvdfile = File("outputs/voltage.pvd")
-	printstep = 10.0
+	printstep = 20.0
 	count = 0
 
 	for (timestep,fields) in solver.solve(interval,dt):
@@ -121,7 +120,7 @@ def solve_cardiac_model():
 		if float(count)%printstep == 0:
 			pvdfile << (v,t0)
 		count += 1
-		print("(t_0, t_1) = (%g, %g)"%timestep)
+		print("(t_0, t_1) = (%g, %g),dt:%g"%(t0,t,t-t0))
 
 solve_cardiac_model()
 

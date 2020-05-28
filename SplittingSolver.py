@@ -67,7 +67,7 @@ class SplittingSolver:
 		params = self._parameters["PDESolver"]
 		Mi = self._model.conductivity()
 		solver = PDESolver(self._domain,self._time,Mi,
-				v_=self.vs[0],params=params)
+				Is=None,v_=self.vs[0],params=params)
 
 		return solver
 
