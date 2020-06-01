@@ -4,6 +4,20 @@ Utilities
 """
 import dolfin 
 
+
+def splat(vs, dim):
+
+    if vs.function_space().ufl_element().num_sub_elements()==dim:
+        v = vs[0]
+        if dim == 2:
+            s = vs[1]
+        else:
+            s = dolfin.as_vector([vs[i] for i in range(1, dim)])
+    else:
+        v, s = dolfin.split(vs)
+
+    return v, s
+
 class TimeStepper:
     """
     A helper object that keep track of simulated time

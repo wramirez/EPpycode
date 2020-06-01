@@ -62,7 +62,7 @@ for (timestep,fields) in cell_solver.solve(interval,dt):
 		(vs_,vs) =fields
 		(t0,t) = timestep
 		if float(count)%printstep == 0:
-			voltage.append(vs.vector().get_local()[0])
+			voltage.append(vs.vector().get_local()[2])
 			time.append(t)
 		count += 1
 		

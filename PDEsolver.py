@@ -61,6 +61,7 @@ class PDESolver():
 		pde = LinearVariationalProblem(a,L,self.v)
 
 		solver = LinearVariationalSolver(pde)
+		solver.parameters.update(self.params["linear_variational_solver"])
 		solver.solve()
 
 	def solution_fields(self):
@@ -72,7 +73,7 @@ class PDESolver():
 		params = Parameters("PDESolver")
 		params.add("theta",0.5)
 		params.add("polynomial_degree",1)
-
+		params.add(LinearVariationalSolver.default_parameters())
 		return params
 
 	def solve(self,interval,dt):

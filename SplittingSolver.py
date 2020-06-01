@@ -83,6 +83,7 @@ class SplittingSolver:
 			yield (t0,t1), self.solution_fields()
 			# update previous solution
 			self.vs_.assign(self.vs)
+			
 
 	def step(self,interval):
 		"""
@@ -99,7 +100,7 @@ class SplittingSolver:
 
 		# solve step 1 of the splitting method
 		self.ode_solver.step((t0,t))
-		# solve step 2 of the splitiing method
+		# solve step 2 of the splitting method
 		self.pde_solver.step((t0,t1))
 		# update variables
 		self.vs_.assign(self.vs)
@@ -108,7 +109,7 @@ class SplittingSolver:
 		self.merge(self.vs_) 
 
 		# solve last step (step 3) 
-		self.ode_solver.step((t,t1))
+		self.ode_solver.step((t,t1))		
 
 	def merge(self,solution):
 		"""
@@ -126,6 +127,8 @@ class SplittingSolver:
 		ode_solver_parameters = ODESolver.default_parameters()
 		ode_solver_parameters["V_polynomial_degree"] = 1
 		ode_solver_parameters["V_polynomial_family"] = "CG"
+		ode_solver_parameters["S_polynomial_degree"] = 1
+		ode_solver_parameters["S_polynomial_family"] = "CG"
 		pde_solver_parameters = PDESolver.default_parameters()
 		params.add(ode_solver_parameters)
 		params.add(pde_solver_parameters)

@@ -5,7 +5,7 @@ ODE solver
 """
 from dolfin import *
 from Stimulus import Stimulus
-from Utilities import TimeStepper,state_space
+from Utilities import TimeStepper,state_space,splat
 
 class ODESolver(object):
 	def __init__(self,domain,time,model,I_s,params=None):
@@ -17,7 +17,6 @@ class ODESolver(object):
 		self._F = self._model.F
 		self._Iion = self._model.I 
 		self._num_states = self._model.num_states()
-
 		# Stimulus
 		self._Is = I_s
 
@@ -35,7 +34,7 @@ class ODESolver(object):
         #if functions spaces are the same 
 		if (v_family == s_family and s_degree == v_degree):
 			self.VS = VectorFunctionSpace(self._domain,v_family,v_degree,
-								self._num_states+1)
+								dim=self._num_states+1)
 		else: 
 			V = FunctionSpace(self._domain, v_family, v_degree)
 			S = state_space(self._domain, self._num_states, s_family, s_degree)
@@ -54,7 +53,7 @@ class ODESolver(object):
 		"""
 
 		(t0,t1) = interval
-		dt = t1 - t0
+		dt = Constant(t1 - t0)
 
 		# test function
 		wtest = TestFunction(self.VS)
@@ -84,13 +83,14 @@ class ODESolver(object):
 		v_mid = theta*v + (1.0-theta)*v_ 
 		s_mid = theta*s + (1.0-theta)*s_
 
-		F_theta = self._F(v_mid,s_mid,time=self._time)
-		I_theta = - self._Iion(v_mid,s_mid,time=self._time)
+		F_theta = self._F(v_mid,s_mid,time=self.time())
+		I_theta = -self._Iion(v_mid,s_mid,time=self.time())
 
 
 		(dz,rhs) = self._Is.rhs(self._domain,w)
 
-		lhs = ((v-v_)/dt-I_theta)*w*dz + inner((s-s_)/dt-F_theta,r)*dz
+		lhs = (((v-v_)/dt)-I_theta)*w*dz() \
+			+ inner(((s-s_)/dt)-F_theta,r)*dz()
 
 		# set up system of equations
 		G = lhs-rhs
