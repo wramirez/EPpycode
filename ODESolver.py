@@ -6,6 +6,7 @@ ODE solver
 from dolfin import *
 from Stimulus import Stimulus
 from Utilities import TimeStepper,state_space,splat
+import numpy as np
 
 class ODESolver(object):
 	def __init__(self,domain,time,model,I_s,params=None):
@@ -94,13 +95,33 @@ class ODESolver(object):
 
 		# set up system of equations
 		G = lhs-rhs
-
+		Jac = derivative(G,self.vs)
 		# solve the system
-		pde = NonlinearVariationalProblem(G, self.vs, J=derivative(G, self.vs))
-		solver = NonlinearVariationalSolver(pde)
-		solver_params = self.params["nonlinear_variational_solver"]
-		solver.parameters.update(solver_params)
-		solver.solve()
+		if False:
+			pde = NonlinearVariationalProblem(G, self.vs, J=Jac)
+			solver = NonlinearVariationalSolver(pde)
+			solver_params = self.params["nonlinear_variational_solver"]
+			solver.parameters.update(solver_params)
+			solver.solve()
+		else:
+			a_tol, r_tol = 1e-7, 1e-10
+			U_inc = Function(self.VS)
+			nIter = 0
+			eps = 1
+
+			while eps > 1e-10 and nIter < 20:              # Newton iterations
+				nIter += 1
+				A, b = assemble_system(Jac, -G)
+				solve(A, U_inc.vector(), b)     # Determine step direction
+				eps = np.linalg.norm(U_inc.vector().get_local(), ord = 2)
+
+				a = assemble(G)
+				fnorm = np.linalg.norm(a.get_local(), ord = 2)
+				lmbda = 1.0     # step size, initially 1
+
+				self.vs.vector()[:] += lmbda*U_inc.vector()    # New u vector
+
+				print ('      {0:2d}  {1:3.2E}  {2:5e}'.format(nIter, eps, fnorm))
 
 	def solution_fields(self):
 		

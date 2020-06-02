@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from dolfin import *
 from ODESolver import SingleCellSolver
 from cell_models.Fenton_Karma_BR_altered import Fenton_Karma_1998_BR_altered
+import numpy as np
 
 # Turn on FFC/FEniCS optimizations
 parameters["form_compiler"]["representation"] = "uflacs"
@@ -42,32 +43,51 @@ cm2mm = 10.
 factor = 1.0/(chi*C_m) # NB: cbcbeat convention
 amplitude = factor*A*(1./cm2mm)**3 # mV/ms
 start = 2.0
-period = 200.0
+period = 400.0
 
 I_s = MyExpression(period,duration,start,amplitude,time)
 
 
 cell_model = Fenton_Karma_1998_BR_altered()
 cell_solver = SingleCellSolver(cell_model,time,I_s)
+(vs_,vs) = cell_solver.solution_fields()
+vs_.assign(interpolate(cell_model.initial_conditions(),vs_.function_space()))
 
-dt = 0.1
+
+dt = 0.02
 interval = (0.0,400.0)
 voltage = []
+s0 = []
+s1 = []
 time = []
 printstep = 10.0
 count = 0
 
-for (timestep,fields) in cell_solver.solve(interval,dt):
+# if True:
+if False:
 
-		(vs_,vs) =fields
-		(t0,t) = timestep
-		if float(count)%printstep == 0:
-			voltage.append(vs.vector().get_local()[2])
-			time.append(t)
-		count += 1
-		
-		print("(t_0, t_1) = (%g, %g)"%timestep)
+	for (timestep,fields) in cell_solver.solve(interval,dt):
 
-plt.figure()
-plt.plot(time,voltage,lw=2)
-plt.show()
+			(vs_,vs) =fields
+			(t0,t) = timestep
+			if float(count)%printstep == 0:
+				voltage.append(vs.vector().get_local()[0])
+				s0.append(vs.vector().get_local()[1])
+				s1.append(vs.vector().get_local()[2])
+				time.append(t)
+			count += 1
+			np.save('outputs/voltage.npy',np.array(voltage))
+			np.save('outputs/v.npy',np.array(s0))
+			np.save('outputs/w.npy',np.array(s1))
+			np.save('outputs/time.npy',np.array(time))
+			print("(t_0, t_1) = (%g, %g)"%timestep)
+else:
+	voltage  = np.load('outputs/voltage.npy')
+	s0  = np.load('outputs/v.npy')
+	s1  = np.load('outputs/w.npy')
+	time = np.load('outputs/time.npy')
+	plt.figure()
+	plt.plot(time,voltage,lw=2,label='V')
+	# plt.plot(time,s0,lw=2,label='v')
+	# plt.plot(time,s1,lw=2,label='w')
+	plt.show()

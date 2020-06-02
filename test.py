@@ -30,11 +30,6 @@ class MyExpression(UserExpression):
 	def eval(self,value,x):
 		t = float(self.t)
 		w = self.w
-		# duration = self.duration
-		# #
-		# f = 0.2
-		# c = 0.7
-		# Iamp = self.Iamp*np.exp(-(((t-self.start)**2)/(f*c**2)))
 		Iamp = self.Iamp
 		I =(Iamp if t-int(t/self.period)*self.period  <= self.duration+self.start else 0.0) \
 			 if (t-int(t/self.period)*self.period >= self.start) else 0.0*Iamp
@@ -97,13 +92,13 @@ def setup_cardiac_model():
 	# Membrane capacitance
 	C_m = 0.01 # mu F / mm^2
 	duration = 2. # ms
-	A = 60000. # mu A/cm^3
+	A = 50000. # mu A/cm^3
 	cm2mm = 10.
 	factor = 1.0/(chi*C_m) # NB: cbcbeat convention
 	amplitude = factor*A*(1./cm2mm)**3 # mV/ms
 	print ("amplitude: ",amplitude)
 	start = 2.0
-	period = 300.0
+	period = 400.0
 
 	I_s = MyExpression(period,duration,start,amplitude,wstim,time)
 		
@@ -120,7 +115,7 @@ def solve_cardiac_model():
 	vs_.assign(interpolate(cell_model.initial_conditions(),vs_.function_space()))
 	
 	dt = 0.05
-	interval = (0.0,200.0)
+	interval = (0.0,800.0)
 
 	pvdfile = File("outputs/voltage.pvd")
 	printstep = 20.0
@@ -136,10 +131,7 @@ def solve_cardiac_model():
 		(t0,t) = timestep
 		(volt,s0,s1) = vs.split(True) 
 		if float(count)%printstep == 0:
-			pvdfile << (volt,t0)
-			sfile << (s1,t0)
-			Isp = project(I_s,V)
-			isfile << (Isp,t0) 
+			pvdfile << (vs.sub(0) ,t0)
 		count += 1
 		
 		print("(t_0, t_1) = (%g, %g),dt:%g"%(t0,t,t-t0))
