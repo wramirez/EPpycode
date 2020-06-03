@@ -8,6 +8,33 @@ from Stimulus import Stimulus
 from Utilities import TimeStepper,state_space,splat
 import numpy as np
 import os.path
+import ufl
+
+def point_integral_solver_default_parameters():
+
+    try:
+        p = PointIntegralSolver.default_parameters()
+    except AttributeError:
+        p = Parameters("point_integral_solver")
+        p.add("reset_stage_solutions", True)
+        # Set parameters for NewtonSolver
+        pn = Parameters("newton_solver")
+        pn.add("maximum_iterations", 40)
+        pn.add("always_recompute_jacobian", False)
+        pn.add("recompute_jacobian_each_solve", True)
+        pn.add("relaxation_parameter", 1., 0., 1.)
+        pn.add("relative_tolerance", 1e-10, 1e-20, 2.)
+        pn.add("absolute_tolerance", 1e-15, 1e-20, 2.)
+        pn.add("kappa", 0.1, 0.05, 1.0)
+        pn.add("eta_0", 1., 1e-15, 1.0)
+        pn.add("max_relative_previous_residual", 1e-1, 1e-5, 1.)
+        pn.add("reset_each_step", True)
+        pn.add("report", False)
+        pn.add("report_vertex", 0, 0, 32767)
+        pn.add("verbose_report", False)
+        p.add(pn)
+    return p
+
 
 class ODESolver(object):
 	def __init__(self,domain,time,model,I_s,params=None):
@@ -172,6 +199,114 @@ class ODESolver(object):
 			# update previous solution
 			self.vs_.assign(self.vs)
 
+class PointODESolver():
+		"""
+			This class is mostly based on cbcbeat class
+		"""
+		def __init__(self,domain,time,model,Is=None,params=None):
+			import ufl.classes
+
+			# Store input
+			self._domain = domain
+			self._time = time
+			self._model = model
+
+			# Extract some information from cell model
+			self._F = self._model.F
+			self._I_ion = self._model.I
+			self._num_states = self._model.num_states()
+
+			self._Is = Is
+
+			# Initialize and update parameters if given
+			self.parameters = self.default_parameters()
+			if params is not None:
+				self.parameters.update(params)
+
+			# Create (vector) function space for potential + states
+			self.VS = VectorFunctionSpace(self._domain, "CG", 1,
+			                      dim=self._num_states+1)
+
+			# Initialize solution field
+			self.vs_ = Function(self.VS, name="vs_")
+			self.vs = Function(self.VS, name="vs")
+
+			# Initialize scheme
+			dim = self._num_states+1
+			v = self.vs[0]
+			s = as_vector([self.vs[i] for i in range(1,dim)])
+
+			wtest = TestFunction(self.VS)
+			w = wtest[0]
+			q = as_vector([wtest[i] for i in range(1,dim)])
+		
+
+			# Workaround to get algorithm in RL schemes working as it only
+			# works for scalar expressions
+			F_exprs = self._F(v, s, self._time)
+			
+			F_exprs_q = ufl.zero()
+			if isinstance(F_exprs, ufl.classes.ListTensor):
+				for i, expr_i in enumerate(F_exprs.ufl_operands):
+					F_exprs_q += expr_i*q[i]
+			else:
+				F_exprs_q = F_exprs*q
+
+			rhs = F_exprs_q - self._I_ion(v, s, self._time)*w
+
+			#this stimulus cannot be marker wise
+			if self._Is:
+				rhs += self._Is*w
+
+			#dP: point integral
+			self._rhs = rhs*dP()
+
+			#sys.exit()
+			name = self.parameters["scheme"]
+			Scheme = eval(name)
+			self._scheme = Scheme(self._rhs, self.vs, self._time)
+			
+			# Initialize solver and update its parameters
+			self._pi_solver = PointIntegralSolver(self._scheme)
+			self._pi_solver.parameters.update(self.parameters["point_integral_solver"])
+
+		@staticmethod
+		def default_parameters():
+
+			params = Parameters("PointODESolver")
+			params.add("scheme", "BackwardEuler")
+			params.add(point_integral_solver_default_parameters())
+			params.add("enable_adjoint", True)
+
+			return params
+
+		def solution_fields(self):
+			return (self.vs_,self.vs)
+
+		def step(self,interval):
+			self.vs.assign(self.vs_)
+
+			(t0, t1) = interval
+			dt = t1 - t0
+
+			self._pi_solver.step(dt)
+
+		def solve(self,interval,dt):
+
+			(T0, T) = interval
+
+			# Create timestepper
+			time_stepper = TimeStepper(interval, dt)
+
+			for t0, t1 in time_stepper:
+
+				self.step((t0, t1))
+
+				# Yield solutions
+				yield (t0, t1), self.solution_fields()
+
+				self.vs_.assign(self.vs)
+
 
 class SingleCellSolver(ODESolver):
 	def __init__(self,model,time,I_s,params=None):
@@ -182,3 +317,13 @@ class SingleCellSolver(ODESolver):
 		stimulus = Stimulus((I_s,),(1,),markers)
 		ODESolver.__init__(self,mesh,time,model,
 				I_s=stimulus,params=params)
+
+class PointSingleCellSolver(PointODESolver):
+	def __init__(self,model,time,I_s,params=None):
+		self._model=model
+		mesh = UnitIntervalMesh(1)
+		markers = MeshFunction("size_t",mesh,1)
+		markers.set_all(1)
+		stimulus = I_s
+		PointODESolver.__init__(self,mesh,time,model,
+				Is=stimulus,params=None)

@@ -5,7 +5,7 @@ test Single Cell
 
 import matplotlib.pyplot as plt
 from dolfin import *
-from ODESolver import SingleCellSolver
+from ODESolver import SingleCellSolver, PointSingleCellSolver
 from cell_models.Fenton_Karma_BR_altered import Fenton_Karma_1998_BR_altered
 import numpy as np
 
@@ -49,7 +49,7 @@ I_s = MyExpression(period,duration,start,amplitude,time)
 
 
 cell_model = Fenton_Karma_1998_BR_altered()
-cell_solver = SingleCellSolver(cell_model,time,I_s)
+cell_solver = PointSingleCellSolver(cell_model,time,I_s)
 (vs_,vs) = cell_solver.solution_fields()
 vs_.assign(interpolate(cell_model.initial_conditions(),vs_.function_space()))
 

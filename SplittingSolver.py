@@ -139,3 +139,6 @@ class SplittingSolver:
 
 		return self.vs_, self.vs, self.v
 
+
+# class PointSplittingSolver(SplittingSolver):
+		# def __init__():
