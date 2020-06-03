@@ -114,7 +114,7 @@ def solve_cardiac_model():
 	(vs_,vs,v) = solver.solution_fields()
 	vs_.assign(interpolate(cell_model.initial_conditions(),vs_.function_space()))
 	
-	dt = 0.05
+	dt = 0.02
 	interval = (0.0,800.0)
 
 	pvdfile = File("outputs/voltage.pvd")

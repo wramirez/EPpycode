@@ -7,6 +7,7 @@ from dolfin import *
 from Stimulus import Stimulus
 from Utilities import TimeStepper,state_space,splat
 import numpy as np
+import os.path
 
 class ODESolver(object):
 	def __init__(self,domain,time,model,I_s,params=None):
@@ -44,6 +45,14 @@ class ODESolver(object):
 
 		self.vs_ = Function(self.VS,name="vs_")
 		self.vs = Function(self.VS,name="vs")
+
+		if os.path.exists("outputs_newton_raphson.out"):
+			os.remove("outputs_newton_raphson.out")
+			self.nrfile = open("outputs_newton_raphson.out","a+")
+			self.nrfile.write("time,  ninter,  fnorm,  unorm, convergence\n")
+		else:
+			self.nrfile = open("outputs_newton_raphson.out","a+")
+			self.nrfile.write("time,  ninter,  fnorm,  unorm, convergence\n")
 
 	def time(self):
 		return self._time
@@ -109,7 +118,7 @@ class ODESolver(object):
 			nIter = 0
 			eps = 1
 
-			while eps > 1e-10 and nIter < 20:              # Newton iterations
+			while eps > 1e-10 and nIter <= 20:              # Newton iterations
 				nIter += 1
 				A, b = assemble_system(Jac, -G)
 				solve(A, U_inc.vector(), b)     # Determine step direction
@@ -122,7 +131,12 @@ class ODESolver(object):
 				self.vs.vector()[:] += lmbda*U_inc.vector()    # New u vector
 
 				print ('      {0:2d}  {1:3.2E}  {2:5e}'.format(nIter, eps, fnorm))
-
+			
+			if(nIter >= 20):
+				self.nrfile.write("%.2f, %i, %.2e, %.2e, False\n"%(float(self.time()),nIter,fnorm,eps))
+			else:
+				self.nrfile.write("%.2f, %i, %.2e, %.2e, True\n"%(float(self.time()),nIter,fnorm,eps))
+			self.nrfile.flush()
 	def solution_fields(self):
 		
 		return self.vs_,self.vs 
