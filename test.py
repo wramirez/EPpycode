@@ -114,7 +114,7 @@ def solve_cardiac_model():
 	(vs_,vs,v) = solver.solution_fields()
 	vs_.assign(interpolate(cell_model.initial_conditions(),vs_.function_space()))
 	
-	dt = 0.02
+	dt = 0.05
 	interval = (0.0,800.0)
 
 	pvdfile = File("outputs/voltage.pvd")
@@ -129,7 +129,7 @@ def solve_cardiac_model():
 
 		(vs_,vs,v) =fields
 		(t0,t) = timestep
-		(volt,s0,s1) = vs.split(True) 
+		(volt,s) = vs.split(True) 
 		if float(count)%printstep == 0:
 			pvdfile << (vs.sub(0) ,t0)
 		count += 1

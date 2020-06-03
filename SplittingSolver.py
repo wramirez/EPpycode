@@ -46,7 +46,7 @@ class SplittingSolver:
 		"""
 		creates cell solver
 		"""
-		stimulus = self._model.stimulus()
+		
 
 		cell_model = self._model.cell_model()
 
@@ -54,7 +54,7 @@ class SplittingSolver:
 		params = self._parameters["ODESolver"]
 
 		solver = ODESolver(self._domain, self._time, cell_model,
-		                               I_s=stimulus,
+		                               I_s=None,
 		                               params=params)
 
 		return solver
@@ -64,10 +64,12 @@ class SplittingSolver:
 		"""
 		creates diffusion solver
 		"""
+		stimulus = self._model.stimulus()
+
 		params = self._parameters["PDESolver"]
 		Mi = self._model.conductivity()
 		solver = PDESolver(self._domain,self._time,Mi,
-				Is=None,v_=self.vs[0],params=params)
+				Is=stimulus,v_=self.vs[0],params=params)
 
 		return solver
 
@@ -127,8 +129,6 @@ class SplittingSolver:
 		ode_solver_parameters = ODESolver.default_parameters()
 		ode_solver_parameters["V_polynomial_degree"] = 1
 		ode_solver_parameters["V_polynomial_family"] = "CG"
-		ode_solver_parameters["S_polynomial_degree"] = 1
-		ode_solver_parameters["S_polynomial_family"] = "CG"
 		pde_solver_parameters = PDESolver.default_parameters()
 		params.add(ode_solver_parameters)
 		params.add(pde_solver_parameters)
