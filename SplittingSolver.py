@@ -10,7 +10,7 @@ from PDESolver import PDESolver
 from Utilities import TimeStepper
 import numpy as np
 
-class SplittingSolver:
+class BasicSplittingSolver:
 	def __init__ (self,model,params=None):
 		"""
 		model = class of the heart
@@ -46,7 +46,7 @@ class SplittingSolver:
 		"""
 		creates cell solver
 		"""
-		
+		stimulus = self._model.stimulus()
 
 		cell_model = self._model.cell_model()
 
@@ -54,7 +54,7 @@ class SplittingSolver:
 		params = self._parameters["ODESolver"]
 
 		solver = ODESolver(self._domain, self._time, cell_model,
-		                               I_s=None,
+		                               I_s=stimulus,
 		                               params=params)
 
 		return solver
@@ -64,12 +64,12 @@ class SplittingSolver:
 		"""
 		creates diffusion solver
 		"""
-		stimulus = self._model.stimulus()
+		
 
 		params = self._parameters["PDESolver"]
 		Mi = self._model.conductivity()
 		solver = PDESolver(self._domain,self._time,Mi,
-				Is=stimulus,v_=self.vs[0],params=params)
+				Is=None,v_=self.vs[0],params=params)
 
 		return solver
 
@@ -140,9 +140,9 @@ class SplittingSolver:
 		return self.vs_, self.vs, self.v
 
 
-class PointSplittingSolver(SplittingSolver):
+class SplittingSolver(BasicSplittingSolver):
 		def __init__(self, model, params= None):
-			SplittingSolver.__init__(self,model,params)
+			BasicSplittingSolver.__init__(self,model,params)
 
 		def _create_ode_solver(self):
 			"""
@@ -158,6 +158,20 @@ class PointSplittingSolver(SplittingSolver):
 											I_s=None,params=params)
 
 			return solver
+
+		def _create_pde_solver(self):
+			"""
+			creates diffusion solver
+			"""
+			stimulus = self._model.stimulus()
+
+			params = self._parameters["PDESolver"]
+			Mi = self._model.conductivity()
+			solver = PDESolver(self._domain,self._time,Mi,
+					Is=stimulus,v_=self.vs[0],params=params)
+
+			return solver
+
 		@staticmethod
 		def default_parameters():
 			params = Parameters("SplittingSolver")
