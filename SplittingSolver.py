@@ -5,7 +5,7 @@ of the EP problems
 
 """
 from dolfin import *
-from ODESolver import ODESolver
+from ODESolver import ODESolver, PointODESolver
 from PDESolver import PDESolver
 from Utilities import TimeStepper
 import numpy as np
@@ -140,5 +140,44 @@ class SplittingSolver:
 		return self.vs_, self.vs, self.v
 
 
-# class PointSplittingSolver(SplittingSolver):
-		# def __init__():
+class PointSplittingSolver(SplittingSolver):
+		def __init__(self, model, params= None):
+			SplittingSolver.__init__(self,model,params)
+
+		def _create_ode_solver(self):
+			"""
+			creates cell solver
+			"""
+
+			cell_model = self._model.cell_model()
+
+			# Extract ode solver parameters
+			Solver = eval(self._parameters["ode_solver_choice"])
+			params = self._parameters[Solver.__name__]
+			solver = Solver(self._domain, self._time, cell_model,
+											I_s=None,params=params)
+
+			return solver
+		@staticmethod
+		def default_parameters():
+			params = Parameters("SplittingSolver")
+			params.add("theta",0.5,0,1)
+			try:
+				params.add("ode_solver_choice","PointODESolver",set(["PointODESolver","ODESolver"]))
+			except:
+				params.add("ode_solver_choice","PointODESolver",["PointODESolver","ODESolver"])
+				pass
+			point_ode_solver_params = PointODESolver.default_parameters()
+			point_ode_solver_params["scheme"] = "RL1"
+			params.add(point_ode_solver_params)
+
+			ode_solver_params = ODESolver.default_parameters()
+			ode_solver_params["V_polynomial_degree"] =1
+			ode_solver_params["V_polynomial_family"] = "CG"
+			params.add(ode_solver_params)
+
+			pde_solver_parameters = PDESolver.default_parameters()
+			params.add(pde_solver_parameters)
+
+			return params
+

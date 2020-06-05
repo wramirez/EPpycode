@@ -4,7 +4,7 @@ Test for Splitting solver
 """
 
 from dolfin import *
-from SplittingSolver import SplittingSolver
+from SplittingSolver import SplittingSolver, PointSplittingSolver
 from Stimulus import Stimulus
 from CardiacModel import CardiacModel
 import numpy as np
@@ -110,7 +110,7 @@ def setup_cardiac_model():
 
 def solve_cardiac_model():
 	cardiac_model,cell_model,I_s,mesh = setup_cardiac_model()
-	solver = SplittingSolver(cardiac_model)
+	solver = PointSplittingSolver(cardiac_model)
 	(vs_,vs,v) = solver.solution_fields()
 	vs_.assign(interpolate(cell_model.initial_conditions(),vs_.function_space()))
 	
@@ -129,7 +129,7 @@ def solve_cardiac_model():
 
 		(vs_,vs,v) =fields
 		(t0,t) = timestep
-		(volt,s) = vs.split(True) 
+		# (volt,s) = vs.split(True) 
 		if float(count)%printstep == 0:
 			pvdfile << (vs.sub(0) ,t0)
 		count += 1

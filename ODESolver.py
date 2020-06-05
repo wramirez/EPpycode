@@ -203,7 +203,7 @@ class PointODESolver():
 		"""
 			This class is mostly based on cbcbeat class
 		"""
-		def __init__(self,domain,time,model,Is=None,params=None):
+		def __init__(self,domain,time,model,I_s=None,params=None):
 			import ufl.classes
 
 			# Store input
@@ -216,12 +216,14 @@ class PointODESolver():
 			self._I_ion = self._model.I
 			self._num_states = self._model.num_states()
 
-			self._Is = Is
+			self._Is = I_s
 
 			# Initialize and update parameters if given
-			self.parameters = self.default_parameters()
+			
 			if params is not None:
-				self.parameters.update(params)
+				self.parameters = params
+			else:
+				self.parameters = self.default_parameters()
 
 			# Create (vector) function space for potential + states
 			self.VS = VectorFunctionSpace(self._domain, "CG", 1,
@@ -262,6 +264,7 @@ class PointODESolver():
 			self._rhs = rhs*dP()
 
 			#sys.exit()
+			print("parameters: ",self.parameters)
 			name = self.parameters["scheme"]
 			Scheme = eval(name)
 			self._scheme = Scheme(self._rhs, self.vs, self._time)
@@ -326,4 +329,4 @@ class PointSingleCellSolver(PointODESolver):
 		markers.set_all(1)
 		stimulus = I_s
 		PointODESolver.__init__(self,mesh,time,model,
-				Is=stimulus,params=None)
+				I_s=stimulus,params=None)
