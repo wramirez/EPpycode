@@ -106,11 +106,13 @@ def setup_cardiac_model():
 	stim = Stimulus((I_s,),(1,),stimcells)
 	heart = CardiacModel(mesh,time,M,cell_model,stim)
 
-	return heart,cell_model,I_s,mesh
+	return heart,cell_model
 
 def solve_cardiac_model():
-	cardiac_model,cell_model,I_s,mesh = setup_cardiac_model()
-	solver = SplittingSolver(cardiac_model)
+	cardiac_model,cell_model = setup_cardiac_model()
+	params = SplittingSolver.default_parameters()
+	params["ode_solver_choice"] = "PointODESolver"
+	solver = SplittingSolver(cardiac_model,params = params)
 	(vs_,vs,v) = solver.solution_fields()
 	vs_.assign(interpolate(cell_model.initial_conditions(),vs_.function_space()))
 	

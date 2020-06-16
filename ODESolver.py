@@ -310,6 +310,26 @@ class PointODESolver():
 
 				self.vs_.assign(self.vs)
 
+class AdaptativeODESolver(PointODESolver):
+	def __init__(self,domain,time,model,I_s=None,params=None):
+		PointODESolver.__init__(self,domain,time,model,I_s,params)
+	def step(self,interval):
+		self.vs.assign(self.vs_)
+
+		(t0, t1) = interval
+		dt = t1 - t0
+
+		self._pi_solver.step_interval(t0,t1,Constant(dt))
+		# self._pi_solver.step(dt)
+	@staticmethod
+	def default_parameters():
+
+		params = Parameters("AdaptativeODESolver")
+		params.add("scheme", "BackwardEuler")
+		params.add(point_integral_solver_default_parameters())
+		params.add("enable_adjoint", True)
+
+		return params
 
 class SingleCellSolver(ODESolver):
 	def __init__(self,model,time,I_s,params=None):

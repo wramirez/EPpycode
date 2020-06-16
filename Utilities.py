@@ -136,3 +136,68 @@ def state_space(domain, d, family=None, k=1):
     else:
         S = dolfin.FunctionSpace(domain, family, k)
     return S
+
+
+class Iapp_0(UserExpression):
+
+    def __init__(self,t,Iamp,t_stim):
+        self.Iamp = Iamp
+        self.t_stim = t_stim
+        self.t = t
+
+    def eval(self,value,x):
+        t = self.t
+        if t < self.t_stim:
+            I = self.Iamp
+        else:
+            I = 0.0*self.Iamp
+
+        return I 
+
+class Iapp_pacing(UserExpression):
+    
+    def __init__(self,t,Iamp,duration,period,start):
+        self.Iamp = Iamp
+        self.period = period
+        self.start = start
+        self.duration = duration
+        self.t = t
+
+    def stim(self,value,x):
+        t = self.t
+        I =(self.Iamp if t-int(t/self.period)*self.period  <= self.duration+self.start else 0.0) \
+             if (t-int(t/self.period)*self.period >= self.start) else 0.0*self.Iamp
+
+        return I
+
+class Iapp_restitution(UserExpression):
+
+    def __init__(self,Iamp,periods,repetitions,start,duration,t):
+        self.Iamp = Iamp
+        self.start = start
+        self.periods = periods
+        self.repetitions = repetitions
+        self.duration = duration
+        self.t = t
+
+    
+    def stim(self,value,x):
+        t = self.t
+        periods = self.periods
+        repetitions = self.repetitions
+
+        period = periods[1]
+        pb = 0
+        for p in range(1,periods.shape[0]):
+            ti = np.sum(periods[p-1::-1]*repetitions[p-1::-1])
+            ts = np.sum(periods[p::-1]*repetitions[p::-1]) 
+            if t < ts and t >= ti:
+                period = periods[p]
+                pb = p
+
+        time = t - np.sum(periods[pb-1::-1]*repetitions[pb-1::-1])
+
+        I =(self.Iamp if time-int(time/period)*period  <= self.duration+self.start else 0.0) \
+             if (time-int(time/period)*period >= self.start) else 0.0*self.Iamp
+
+        return I

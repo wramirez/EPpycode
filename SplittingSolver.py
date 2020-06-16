@@ -5,7 +5,7 @@ of the EP problems
 
 """
 from dolfin import *
-from ODESolver import ODESolver, PointODESolver
+from ODESolver import ODESolver, PointODESolver,AdaptativeODESolver
 from PDESolver import PDESolver
 from Utilities import TimeStepper
 import numpy as np
@@ -153,6 +153,7 @@ class SplittingSolver(BasicSplittingSolver):
 
 			# Extract ode solver parameters
 			Solver = eval(self._parameters["ode_solver_choice"])
+			print(Solver.__name__)
 			params = self._parameters[Solver.__name__]
 			solver = Solver(self._domain, self._time, cell_model,
 											I_s=None,params=params)
@@ -163,6 +164,7 @@ class SplittingSolver(BasicSplittingSolver):
 			"""
 			creates diffusion solver
 			"""
+
 			stimulus = self._model.stimulus()
 
 			params = self._parameters["PDESolver"]
@@ -177,16 +179,22 @@ class SplittingSolver(BasicSplittingSolver):
 			params = Parameters("SplittingSolver")
 			params.add("theta",0.5,0,1)
 			try:
-				params.add("ode_solver_choice","PointODESolver",set(["PointODESolver","ODESolver"]))
+				params.add("ode_solver_choice","AdaptativeODESolver",\
+					set(["AdaptativeODESolver","PointODESolver","ODESolver"]))
 			except:
-				params.add("ode_solver_choice","PointODESolver",["PointODESolver","ODESolver"])
+				params.add("ode_solver_choice","AdaptativeODESolver",\
+					["AdaptativeODESolver","PointODESolver","ODESolver"])
 				pass
 			point_ode_solver_params = PointODESolver.default_parameters()
 			point_ode_solver_params["scheme"] = "RL1"
 			params.add(point_ode_solver_params)
 
+			adapt_ode_solver_params = AdaptativeODESolver.default_parameters()
+			adapt_ode_solver_params["scheme"] = "RL1"
+			params.add(adapt_ode_solver_params)
+			
 			ode_solver_params = ODESolver.default_parameters()
-			ode_solver_params["V_polynomial_degree"] =1
+			ode_solver_params["V_polynomial_degree"] = 1
 			ode_solver_params["V_polynomial_family"] = "CG"
 			params.add(ode_solver_params)
 
