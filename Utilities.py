@@ -138,13 +138,13 @@ def state_space(domain, d, family=None, k=1):
     return S
 
 
-class Iapp_0(UserExpression):
+class Iapp_0(dolfin.UserExpression):
 
-    def __init__(self,t,Iamp,t_stim):
+    def __init__(self,t,Iamp,t_stim,**kwargs):
         self.Iamp = Iamp
         self.t_stim = t_stim
-        self.t = t
-
+        self.t = float(t)
+        super().__init__(self,**kwargs)
     def eval(self,value,x):
         t = self.t
         if t < self.t_stim:
@@ -154,34 +154,40 @@ class Iapp_0(UserExpression):
 
         return I 
 
-class Iapp_pacing(UserExpression):
+    def value_shape(self):
+        return ()
+
+class Iapp_pacing(dolfin.UserExpression):
     
-    def __init__(self,t,Iamp,duration,period,start):
+    def __init__(self,t,Iamp,duration,period,start,**kwargs):
         self.Iamp = Iamp
         self.period = period
         self.start = start
         self.duration = duration
-        self.t = t
-
-    def stim(self,value,x):
+        self.t = float(t)
+        super().__init__(self,**kwargs)
+    def eval(self,value,x):
         t = self.t
         I =(self.Iamp if t-int(t/self.period)*self.period  <= self.duration+self.start else 0.0) \
              if (t-int(t/self.period)*self.period >= self.start) else 0.0*self.Iamp
 
         return I
+    def value_shape(self):
+        return ()
 
-class Iapp_restitution(UserExpression):
 
-    def __init__(self,Iamp,periods,repetitions,start,duration,t):
+class Iapp_restitution(dolfin.UserExpression):
+
+    def __init__(self,t,Iamp,periods,repetitions,start,duration,**kwargs):
         self.Iamp = Iamp
         self.start = start
         self.periods = periods
         self.repetitions = repetitions
         self.duration = duration
-        self.t = t
-
+        self.t = float(t)
+        super().__init__(self,**kwargs)
     
-    def stim(self,value,x):
+    def eval(self,value,x):
         t = self.t
         periods = self.periods
         repetitions = self.repetitions
@@ -201,3 +207,6 @@ class Iapp_restitution(UserExpression):
              if (time-int(time/period)*period >= self.start) else 0.0*self.Iamp
 
         return I
+
+    def value_shape(self):
+        return ()

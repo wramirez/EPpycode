@@ -9,6 +9,8 @@ from Stimulus import Stimulus
 from CardiacModel import CardiacModel
 import numpy as np
 from cell_models.Fenton_Karma_BR_altered import Fenton_Karma_1998_BR_altered
+from cell_models.Proposed_Model import SimplifiedCellModel
+from Utilities import Iapp_pacing
 import matplotlib.pyplot as plt 
 
 # Turn on FFC/FEniCS optimizations
@@ -17,25 +19,6 @@ parameters["form_compiler"]["cpp_optimize"] = True
 flags = ["-O3", "-ffast-math", "-march=native"]
 parameters["form_compiler"]["cpp_optimize_flags"] = " ".join(flags)
 parameters["form_compiler"]["quadrature_degree"] = 3
-
-class MyExpression(UserExpression):
-	def __init__(self,period,duration,start,Iamp,w,t,**kwargs):
-		self.period = period
-		self.duration = duration
-		self.start = start
-		self.Iamp = Iamp
-		self.t = t
-		self.w = w
-		super().__init__(self,**kwargs)
-	def eval(self,value,x):
-		t = float(self.t)
-		w = self.w
-		Iamp = self.Iamp
-		I =(Iamp if t-int(t/self.period)*self.period  <= self.duration+self.start else 0.0) \
-			 if (t-int(t/self.period)*self.period >= self.start) else 0.0*Iamp
-		
-		
-		value[0] = I
 
 def create_mesh(dx,Lx,Ly,Lz,wstim):
 	N = lambda v:int(np.int(v))
@@ -100,9 +83,11 @@ def setup_cardiac_model():
 	start = 2.0
 	period = 400.0
 
-	I_s = MyExpression(period,duration,start,amplitude,wstim,time)
-		
-	cell_model = Fenton_Karma_1998_BR_altered()
+	# I_s = MyExpression(period,duration,start,amplitude,wstim,time)
+	I_s = Iapp_pacing(time,amplitude,duration,period,start)
+
+	# cell_model = Fenton_Karma_1998_BR_altered()
+	cell_model = SimplifiedCellModel()
 	stim = Stimulus((I_s,),(1,),stimcells)
 	heart = CardiacModel(mesh,time,M,cell_model,stim)
 
@@ -112,6 +97,7 @@ def solve_cardiac_model():
 	cardiac_model,cell_model = setup_cardiac_model()
 	params = SplittingSolver.default_parameters()
 	params["ode_solver_choice"] = "PointODESolver"
+	params["PointODESolver"]["scheme"] = "BackwardEuler"
 	solver = SplittingSolver(cardiac_model,params = params)
 	(vs_,vs,v) = solver.solution_fields()
 	vs_.assign(interpolate(cell_model.initial_conditions(),vs_.function_space()))
@@ -137,6 +123,8 @@ def solve_cardiac_model():
 		count += 1
 		
 		print("(t_0, t_1) = (%g, %g),dt:%g"%(t0,t,t-t0))
+
+		
 solve_cardiac_model()
 
 
